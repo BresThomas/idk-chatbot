@@ -1,13 +1,17 @@
 {
   "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
+    "allowJs": true, // Permet d'inclure les fichiers .js
+    "checkJs": true, // Vérifie les fichiers .js
+    "noImplicitAny": false, // Cela désactive l'erreur de type 'any' implicite, mais ce n'est pas recommandé.
     "target": "ES2020",
     "useDefineForClassFields": true,
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
     "module": "ESNext",
     "skipLibCheck": true,
-
     /* Bundler mode */
-    "moduleResolution": "bundler",
+    "moduleResolution": "node",
+    // "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
