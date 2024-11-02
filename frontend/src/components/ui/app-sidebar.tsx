@@ -1,3 +1,5 @@
+import { useEffect, useState } from "react";
+import { auth } from "@/firebase/firebaseConfig";
 import { Calendar, Home, Inbox, Search, Settings } from "lucide-react";
 
 import {
@@ -43,12 +45,21 @@ const items = [
 ];
 
 export function AppSidebar({ onLogout }: { onLogout: () => void }) {
+  const [username, setUsername] = useState<string | null>(null);
+
+  useEffect(() => {
+    const user = auth.currentUser; // Get the current user
+    if (user) {
+      setUsername(user.displayName || user.email); // Use displayName or email as username
+    }
+  }, []);
+
   return (
     <Sidebar>
       <SidebarContent>
         <SidebarGroup>
           <div className="flex justify-between w-full items-center mt-1.5">
-            <SidebarGroupLabel>Application</SidebarGroupLabel>
+          <SidebarGroupLabel>{username ? username : "Loading..."}</SidebarGroupLabel>
             <SidebarTrigger />
           </div>
           <SidebarGroupContent>

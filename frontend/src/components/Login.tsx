@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { auth } from '../firebase/firebaseConfig';
+import { auth } from '@/firebase/firebaseConfig';
 import { signInWithPopup, onAuthStateChanged, GithubAuthProvider } from 'firebase/auth';
 import { Dispatch, SetStateAction } from 'react';
 import firebase from 'firebase/compat/app';

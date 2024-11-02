@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import { sessionState, useChatSession } from "@chainlit/react-client";
 import { useRecoilValue } from "recoil";
 import { Playground } from "./components/playground";
-import { auth } from "./firebase/firebaseConfig";
+import { auth } from "@/firebase/firebaseConfig";
 import firebase from "firebase/compat/app";
 import { SidebarProvider } from "./components/ui/sidebar";
 import { AppSidebar } from "./components/ui/app-sidebar";
