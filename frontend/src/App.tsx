@@ -5,7 +5,7 @@ import { useRecoilValue } from "recoil";
 import Login from './components/Login';
 import { Playground } from "./components/playground";
 import { auth } from './firebase/firebaseConfig';
-import firebase from 'firebase/compat/app'; // Assurez-vous que cela correspond à votre configuration
+import firebase from 'firebase/compat/app';
 
 
 const userEnv = {};
