@@ -1,14 +1,15 @@
+// firebaseConfig.js
 import { initializeApp } from 'firebase/app';
 import { getAuth, GithubAuthProvider } from 'firebase/auth';
 
 const firebaseConfig = {
-    apiKey: import.meta.env.REACT_APP_FIREBASE_API_KEY,
-    authDomain: import.meta.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
-    projectId: import.meta.env.REACT_APP_FIREBASE_PROJECT_ID,
-    storageBucket: import.meta.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
-    messagingSenderId: import.meta.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
-    appId: import.meta.env.REACT_APP_FIREBASE_APP_ID,
-};
+    apiKey: "AIzaSyCOvPctaZQNBbFD1BQvM0Bwmsd5wqxd0yY",
+    authDomain: "idk-chat-bd017.firebaseapp.com",
+    projectId: "idk-chat-bd017",
+    storageBucket: "idk-chat-bd017.firebasestorage.app",
+    messagingSenderId: "63946407621",
+    appId: "1:63946407621:web:65dfbff78cb9eddcf5faac"
+  };
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
