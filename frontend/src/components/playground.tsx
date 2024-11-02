@@ -7,12 +7,13 @@ import {
   IStep,
 } from "@chainlit/react-client";
 import { useState } from "react";
-import { SidebarTrigger } from "./ui/sidebar";
+import { SidebarTrigger, useSidebar } from "./ui/sidebar";
 
 export function Playground() {
   const [inputValue, setInputValue] = useState("");
   const { sendMessage } = useChatInteract();
   const { messages } = useChatMessages();
+  const { open, isMobile } = useSidebar();
 
   const handleSendMessage = () => {
     const content = inputValue.trim();
@@ -50,7 +51,8 @@ export function Playground() {
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex flex-col">
       <div className="pl-4 pt-4">
-        <SidebarTrigger />
+        {!isMobile && !open && <SidebarTrigger />}
+        {isMobile && <SidebarTrigger />}
       </div>
       <div className="flex-1 overflow-auto p-6">
         <div className="space-y-4">

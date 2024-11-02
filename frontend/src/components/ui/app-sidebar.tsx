@@ -9,6 +9,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { Button } from "./button";
 
@@ -46,7 +47,10 @@ export function AppSidebar({ onLogout }: { onLogout: () => void }) {
     <Sidebar>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Application</SidebarGroupLabel>
+          <div className="flex justify-between w-full items-center mt-1.5">
+            <SidebarGroupLabel>Application</SidebarGroupLabel>
+            <SidebarTrigger />
+          </div>
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => (
