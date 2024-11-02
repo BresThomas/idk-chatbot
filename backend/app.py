@@ -8,6 +8,8 @@ from chainlit.utils import mount_chainlit
 
 from dotenv import load_dotenv
 
+
+
 load_dotenv()
 
 app = FastAPI()
@@ -20,7 +22,6 @@ app.add_middleware(
     allow_headers=["*"],  # Allows all headers
 )
 
-
 @app.get("/custom-auth")
 async def custom_auth():
     # Verify the user's identity with custom logic.
@@ -28,3 +29,6 @@ async def custom_auth():
     return JSONResponse({"token": token})
 
 mount_chainlit(app=app, target="cl_app.py", path="/chainlit")
+
+
+

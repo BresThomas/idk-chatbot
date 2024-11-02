@@ -9,6 +9,9 @@ import chainlit as cl
 
 from dotenv import load_dotenv
 
+import firebase_admin
+from firebase_admin import credentials, firestore
+
 load_dotenv()
 
 
@@ -42,6 +45,32 @@ async def on_message(message: cl.Message):
 
     msg = cl.Message(content="")
 
+    async for chunk in runnable.astream(
+        {"question": message.content},
+        config=RunnableConfig(callbacks=[cl.LangchainCallbackHandler()]),
+    ):
+        await msg.stream_token(chunk)
+
+    await msg.send()
+
+# Initialize Firestore DB
+cred = credentials.Certificate('credentials/idk-chat-bd017-firebase-adminsdk-977ma-c9468a1167.json')
+firebase_admin.initialize_app(cred)
+db = firestore.client()
+
+@cl.on_message
+async def on_message(message: cl.Message):
+    runnable = cast(Runnable, cl.user_session.get("runnable"))
+
+    # Sauvegarder le message entrant dans Firestore
+    messages_ref = db.collection('messages')
+    messages_ref.add({
+        #TODO : Ajouter l'UID de l'utilisateur + le nom de la conversation
+        'content': message.content,
+        'timestamp': firestore.SERVER_TIMESTAMP
+    })
+
+    msg = cl.Message(content="")
     async for chunk in runnable.astream(
         {"question": message.content},
         config=RunnableConfig(callbacks=[cl.LangchainCallbackHandler()]),
