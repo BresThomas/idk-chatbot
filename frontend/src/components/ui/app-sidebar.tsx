@@ -79,7 +79,7 @@ export function AppSidebar({ onLogout }: { onLogout: () => void }) {
           <Button
             onClick={onLogout} // Appelle la fonction de déconnexion
             className="bg-red-600 text-white mb-2 mt-auto">
-            Logout
+            Déconnexion
           </Button>
         </SidebarGroup>
       </SidebarContent>
