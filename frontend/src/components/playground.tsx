@@ -8,6 +8,7 @@ import {
   IStep,
 } from "@chainlit/react-client";
 import { useState } from "react";
+import { FileUpload } from "./ui/file-upload";
 
 export function Playground() {
   const [inputValue, setInputValue] = useState("");
@@ -54,6 +55,7 @@ export function Playground() {
           {messages.map((message) => renderMessage(message))}
         </div>
       </div>
+      <FileUpload />
       <div className="border-t p-4 bg-white dark:bg-gray-800">
         <div className="flex items-center space-x-2">
           <Input
