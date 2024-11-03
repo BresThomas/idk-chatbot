@@ -1,6 +1,14 @@
 import { useEffect, useState } from "react";
 import { auth } from "@/firebase/firebaseConfig";
-import { Calendar, Home, Inbox, Search, Settings } from "lucide-react";
+import {
+  CalendarCheck,
+  HelpCircle,
+  MessageCircle,
+  Newspaper,
+  Sun,
+  Tag,
+  Settings,
+} from "lucide-react";
 
 import {
   Sidebar,
@@ -14,33 +22,49 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { Button } from "./button";
+import { Tooltip } from "@radix-ui/react-tooltip";
 
 // Menu items.
 const items = [
   {
-    title: "Home",
+    title: "FAQ Générale",
     url: "#",
-    icon: Home,
+    icon: HelpCircle, // Icône pour l'aide ou FAQ
   },
   {
-    title: "Inbox",
+    title: "Support Technique",
     url: "#",
-    icon: Inbox,
+    icon: Tooltip, // Icône pour le support technique
   },
   {
-    title: "Calendar",
+    title: "Météo",
     url: "#",
-    icon: Calendar,
+    icon: Sun, // Icône pour la météo
   },
   {
-    title: "Search",
+    title: "Actualités",
     url: "#",
-    icon: Search,
+    icon: Newspaper, // Icône pour les actualités
   },
   {
-    title: "Settings",
+    title: "Réservations",
     url: "#",
-    icon: Settings,
+    icon: CalendarCheck, // Icône pour les réservations
+  },
+  {
+    title: "Promotions",
+    url: "#",
+    icon: Tag, // Icône pour les promotions
+  },
+  {
+    title: "Compte",
+    url: "#",
+    icon: Settings, // Icône pour le compte utilisateur
+  },
+  {
+    title: "Suggestions",
+    url: "#",
+    icon: MessageCircle, // Icône pour les suggestions
   },
 ];
 
@@ -61,6 +85,10 @@ export function AppSidebar({ onLogout }: { onLogout: () => void }) {
           <div className="flex justify-between w-full items-center mt-1.5">
             <SidebarGroupLabel>
               <p className="text-lg">{username ? username : "Loading..."}</p>
+              <a href="/settings">
+                <Settings height={16} width={16} className="ml-20" />{" "}
+                {/* Icône d'engrenage */}
+              </a>
             </SidebarGroupLabel>
             <SidebarTrigger />
           </div>

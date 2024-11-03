@@ -1,5 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 import { sessionState, useChatSession } from "@chainlit/react-client";
 import { useRecoilValue } from "recoil";
 import { Playground } from "./components/playground";
@@ -8,6 +13,7 @@ import firebase from "firebase/compat/app";
 import { SidebarProvider } from "./components/ui/sidebar";
 import { AppSidebar } from "./components/ui/app-sidebar";
 import LandingPage from "./components/Landing-Page";
+import SettingsPage from "./components/SettingsPage";
 
 const userEnv = {}; // Configure userEnv here if necessary
 
@@ -47,7 +53,7 @@ function App() {
       <Routes>
         {/* Home page */}
         <Route path="/" element={<LandingPage setUser={setUser} />} />
-
+        <Route path="/settings" element={<SettingsPage />} />
         {/* Protected route: dashboard */}
         <Route
           path="/dashboard"
