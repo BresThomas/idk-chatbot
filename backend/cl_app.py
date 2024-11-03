@@ -1,6 +1,6 @@
 import chainlit as cl
 from langchain_aws import ChatBedrockConverse
-from langchain.prompts import ChatPromptTemplate
+from langchain.prompts import ChatPromptTemplate, PromptTemplate
 from langchain.schema import StrOutputParser
 from typing import cast
 from langchain.schema.runnable import RunnableConfig, Runnable
@@ -14,13 +14,10 @@ from dotenv import load_dotenv
 from io import BytesIO
 import json  # Pour traiter la réponse JSON
 import base64  # Pour décoder l'image en base64
-from langchain_aws import ChatBedrockConverse, BedrockEmbeddings
-from langchain.prompts import ChatPromptTemplate, PromptTemplate
-from langchain.schema import StrOutputParser
-from langchain.schema.runnable import Runnable
-from langchain.schema.runnable.config import RunnableConfig
-from dotenv import load_dotenv
-import chainlit as cl
+from langchain_aws import BedrockEmbeddings
+from metadata_filtered_retriever import MetadataFilteredRetriever
+from langchain_core.runnables import RunnablePassthrough
+
 load_dotenv()
 
 # Initialiser le correcteur orthographique pour le français
@@ -28,6 +25,7 @@ spell = SpellChecker(language="fr")
 
 # Fonction pour calculer le pourcentage de fautes d'orthographe
 def calculer_fautes(message):
+    print("Calcul du pourcentage de fautes...")
     mots = message.split()
     mots_incorrects = spell.unknown(mots)
     pourcentage_fautes = (len(mots_incorrects) / len(mots)) * 100 if mots else 0
@@ -48,6 +46,7 @@ def deform_response(response):
 
 @cl.on_chat_start
 async def on_chat_start():
+    
     ehs = ChatBedrockConverse(
         model="anthropic.claude-3-sonnet-20240229-v1:0",
         region_name="us-west-2",
@@ -80,16 +79,45 @@ async def on_chat_start():
     cl.user_session.set("current_retriever", "default")  # Set default context
 
     await Message(
-        content="Bonjour ! Souhaitez-vous utiliser le chatbot en version **généraliste**, **EHS**, ou pour générer une **image** ?\n\n."
+        content="Bonjour ! Souhaitez-vous utiliser le chatbot en version **généraliste**, **EHS**, ou pour générer une **image** ?"
     ).send()
 
 @cl.on_message
 async def on_message(message: Message):
+    # Vérifier si l'utilisateur veut changer de mode
+    if message.content.startswith("changer de mode"):
+        cl.user_session.set("mode", None)  # Réinitialise le mode pour forcer un nouveau choix
+        cl.user_session.set("runnable", None)  # Supprime l'ancien runnable
+        nouveau_mode = message.content.split(" ", 1)[1].strip().lower()
+        if nouveau_mode in ["généraliste", "ehs", "image", "alcool"]:
+            await Message(content=f"Vous avez choisi de passer en mode **{nouveau_mode}**. Veuillez confirmer en posant une question.").send()
+            return
+        else:
+            await Message(content="Veuillez choisir entre 'généraliste', 'ehs', 'image' ou 'alcool'.").send()
+            return
+    
     # Initialiser le client Bedrock pour toutes les opérations
-    client = boto3.client("default", region_name="us-west-2")
+    client = boto3.client("bedrock-runtime", region_name="us-west-2")
 
     # Vérifier si le mode est déjà stocké dans la session
     mode = cl.user_session.get("mode")
+
+    # Récupérer les éléments nécessaires
+    retrievers = cl.user_session.get("retrievers")
+    current_retriever = cl.user_session.get("current_retriever")
+
+
+    # Check if the message contains a command to change context
+    if message.content.startswith("/context"):
+        new_context = message.content.split()[1]
+        if new_context in retrievers:
+            cl.user_session.set("current_retriever", new_context)
+            await cl.Message(content=f"Switched to {new_context} context.").send()
+            return
+        else:
+            await cl.Message(content="Invalid context. Available contexts: " + 
+                            ", ".join(retrievers.keys())).send()
+            return
 
     if not mode:
         mode_input = message.content.strip().lower()
@@ -137,18 +165,18 @@ Voici la question de l'utilisateur : {message.content}"""
         cl.user_session.set("mode", mode)
 
         if mode == "image":
-            # Pour le mode image, on n'utilise pas un LLM, mais on stocke simplement le mode
-            await Message(content=f"Le chatbot est prêt à générer des images. Décrivez l'image que vous souhaitez obtenir !").send()
+            await Message(content="Le chatbot est prêt à générer des images. Décrivez l'image que vous souhaitez obtenir !").send()
             return
 
         else:
-            # Initialiser le LLM pour les autres modes
+            # Initialiser le LLM pour les autres modes (déplacé ici pour une meilleure logique)
             llm = ChatBedrockConverse(
                 model="anthropic.claude-3-sonnet-20240229-v1:0",
                 region_name="us-west-2",
                 temperature=0,
                 max_tokens=None
             )
+            print(f"Mode choisi : {mode}")
 
             if mode == "généraliste":
                 prompt = ChatPromptTemplate.from_messages(
@@ -156,24 +184,8 @@ Voici la question de l'utilisateur : {message.content}"""
                      ("human", "{question}")]
                 )
             elif mode == "ehs":
-                # Retrieve stored components
-                retrievers = cl.user_session.get("retrievers")
-                ehs = cl.user_session.get("ehs")
-                current_retriever = cl.user_session.get("current_retriever")
-                
-                # Check if the message contains a command to change context
-                if message.content.startswith("/context"):
-                    new_context = message.content.split()[1]
-                    if new_context in retrievers:
-                        cl.user_session.set("current_retriever", new_context)
-                        await cl.Message(content=f"Switched to {new_context} context.").send()
-                        return
-                    else:
-                        await cl.Message(content="Invalid context. Available contexts: " + 
-                                        ", ".join(retrievers.keys())).send()
-                        return
-
                 # Create and execute the RAG chain with the current retriever
+                ehs = cl.user_session.get("ehs")
                 rag_chain = create_chain(ehs, retrievers[current_retriever])
                 res = rag_chain.invoke(message.content)
                 await cl.Message(content=res).send()
@@ -201,70 +213,43 @@ Voici la question de l'utilisateur : {message.content}"""
         await Message(content="Erreur : Le chatbot n'a pas été correctement configuré. Veuillez redémarrer et choisir un mode.").send()
         return
 
-    # Vérifier la langue du message et calculer les fautes si c'est en français
-    langue = detect(message.content)
-    pourcentage_fautes = 0
-    if langue == "fr":
-        pourcentage_fautes = calculer_fautes(message.content)
-
-    msg = Message(content="")
-
-    if mode == "image":
-        try:
-            model_id = "stability.stable-diffusion-xl-v1"
-            native_request = {
-                "text_prompts": [{"text": message.content, "weight": 1}],
-                "cfg_scale": 10,
-                "steps": 50,
-                "seed": random.randint(0, 4294967295),  # Génère une seed aléatoire
-                "width": 512,
-                "height": 512,
-                "samples": 1
-            }
-            request_body = json.dumps(native_request)
-            response = client.invoke_model(
-                modelId=model_id,
-                contentType="application/json",
-                accept="application/json",
-                body=request_body
+    # Logique pour la réponse de l'assistant
+    try:
+        if mode == "image":
+            # Logique pour la génération d'images serait ici
+            await Message(content="La génération d'images n'est pas encore implémentée.").send()
+        elif mode == "généraliste":
+            prompt = ChatPromptTemplate.from_messages(
+                [("system", "Vous êtes un assistant généraliste dont la tâche est de répondre à des questions générales."),
+                ("human", "{question}")]
             )
-            model_response = json.loads(response["body"].read())
-            base64_image_data = model_response["artifacts"][0]["base64"]
-
-            # Décoder les données de l'image encodée en base64
-            image_bytes = base64.b64decode(base64_image_data)
-
-            # Créer l'élément d'image
-            image_element = Image(
-                name="image.png",
-                content=image_bytes,
-                display="inline",
+        elif mode == "ehs":
+            # Créez et exécutez la chaîne RAG avec le récupérateur actuel
+            ehs = cl.user_session.get("ehs")
+            rag_chain = create_chain(ehs, retrievers[current_retriever])
+            res = rag_chain.invoke(message.content)
+            await cl.Message(content=res).send()  # Assurez-vous que send() est une coroutine
+            prompt = ChatPromptTemplate.from_messages(
+                [("system", "Vous êtes un expert en EHS (Environnement, Hygiène et Sécurité)."),
+                ("human", "{question}")]
             )
+        elif mode == "alcool":
+            prompt = ChatPromptTemplate.from_messages(
+                [("system", "Tu es un assistant généraliste mais toutes tes réponses doivent posséder leurs lettres dans le désordre."),
+                ("human", "{question}")]
+            )
+        else:
+            response = await runnable.invoke(message.content)  # Invoke the runnable
+            pourcentage_fautes = calculer_fautes(response)
 
-            # Envoyer le message avec l'élément d'image attaché
-            msg = await Message(content="Voici l'image générée :").send()
-            await image_element.send(for_id=msg.id)
+            if pourcentage_fautes > 20:
+                response = deform_response(response)
 
-        except Exception as e:
-            await Message(content="Erreur lors de la génération de l'image.").send()
-            print(f"Erreur de génération d'image : {e}")
-        return
+            await Message(content=response).send()  # Assurez-vous que send() est une coroutine
 
-
-    else:
-        async for chunk in runnable.astream(
-            {"question": message.content},
-            config=RunnableConfig(callbacks=[cl.LangchainCallbackHandler()]),
-        ):
-            response_chunk = chunk
-            # Appliquer la déformation uniquement si le texte est en français et que le seuil de fautes est dépassé
-            if langue == "fr" and pourcentage_fautes > 50:
-                response_chunk = deform_response(response_chunk)
-            
-            await msg.stream_token(response_chunk)
-
-        await msg.send()
-
+    except Exception as e:
+        print(f"Erreur lors de l'invocation du modèle : {e}")
+        await Message(content="Une erreur est survenue lors de la génération de la réponse.").send()  # Assurez-vous que send() est une coroutine
 
 def create_chain(llm, retriever):
     """Creates a RAG chain for processing queries."""
