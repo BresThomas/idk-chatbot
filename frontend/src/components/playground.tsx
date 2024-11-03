@@ -26,11 +26,11 @@ export function Playground() {
         name: "user",
         type: "user_message" as const,
         output: content,
-        file: uploadedFiles,
+        // file: uploadedFiles,
       };
       sendMessage(message, []);
       setInputValue("");
-      setUploadedFiles([]);
+      // setUploadedFiles([]);
     }
   };
 
