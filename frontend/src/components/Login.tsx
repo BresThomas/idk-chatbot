@@ -41,11 +41,14 @@ const Login: React.FC<LoginProps> = ({ onUserChange, loginText }) => {
   }, [onUserChange, navigate]);
 
   return (
-    <div className='flex items-center justify-center h-screen'>
+    <div className="flex items-center justify-center h-screen">
       <button
-        className='px-4 py-2 text-white bg-[#709CA7] rounded'
-        onClick={handleLogin}
-      >
+        style={{
+          background: "linear-gradient(120deg, #5391c1, #876bca)",
+          color: "white",
+        }}
+        className="px-4 py-2 text-white rounded"
+        onClick={handleLogin}>
         {loginText}
       </button>
     </div>
