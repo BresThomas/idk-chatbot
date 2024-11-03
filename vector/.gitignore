@@ -1,2 +1,4 @@
 .venv
 .env
+/documents
+/my_embeddings

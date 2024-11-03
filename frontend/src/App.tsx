@@ -12,29 +12,25 @@ import LandingPage from "./components/Landing-Page";
 const userEnv = {}; // Configure userEnv here if necessary
 
 function App() {
-  const { connect } = useChatSession();
-  const session = useRecoilValue(sessionState);
   const [user, setUser] = useState<firebase.User | null>(null);
 
-  // Connect to the API once the user is connected and the session is ready
+  const { connect } = useChatSession();
+  const session = useRecoilValue(sessionState);
   useEffect(() => {
-    const connectChatSession = async () => {
-      if (!session?.socket.connected && user) {
-        try {
-          const response = await fetch("http://localhost:80/custom-auth");
-          const data = await response.json();
-          connect({
-            userEnv,
-            accessToken: `Bearer ${data.token}`, // Note the space after "Bearer"
-          });
-        } catch (error) {
-          console.error("Error connecting to chat session: ", error);
-        }
-      }
-    };
-    
-    connectChatSession();
-  }, [connect, session, user]);
+    if (session?.socket.connected) {
+      return;
+    }
+    fetch("http://localhost:80/custom-auth")
+      .then((res) => {
+        return res.json();
+      })
+      .then((data) => {
+        connect({
+          userEnv,
+          accessToken: `Bearer: ${data.token}`,
+        });
+      });
+  }, [connect]);
 
   // Handle logout
   const handleLogout = async () => {
