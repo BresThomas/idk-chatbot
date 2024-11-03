@@ -9,12 +9,12 @@ interface LandingPageProps {
 
 const LandingPage: React.FC<LandingPageProps> = ({ setUser }) => {
   return (
-    <div className='min-h-screen'>
+    <div className="min-h-screen flex flex-1 flex-col">
       <Navbar setUser={setUser} />
       <Hero12 />
-      <footer className='bg-[#344D59] text-white py-4'>
-        <div className='container mx-auto text-center'>
-          <p>&copy; 2023 Your Company. All rights reserved.</p>
+      <footer className="bg-[#000000]/85 text-white py-4 mt-auto">
+        <div className="container mx-auto text-center">
+          <p>&copy; 2024 I don't know. All rights reserved.</p>
         </div>
       </footer>
     </div>

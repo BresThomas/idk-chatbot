@@ -59,7 +59,9 @@ export function AppSidebar({ onLogout }: { onLogout: () => void }) {
       <SidebarContent>
         <SidebarGroup>
           <div className="flex justify-between w-full items-center mt-1.5">
-          <SidebarGroupLabel>{username ? username : "Loading..."}</SidebarGroupLabel>
+            <SidebarGroupLabel>
+              <p className="text-lg">{username ? username : "Loading..."}</p>
+            </SidebarGroupLabel>
             <SidebarTrigger />
           </div>
           <SidebarGroupContent>
