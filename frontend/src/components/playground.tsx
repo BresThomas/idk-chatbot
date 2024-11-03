@@ -11,6 +11,7 @@ import { SidebarTrigger, useSidebar } from "./ui/sidebar";
 import { SimpleFileUpload } from "./ui/file-upload";
 import { UploadedFileItem } from "./ui/uploaded-file-item";
 import { FileDropzone } from "./ui/file-dropzone";
+import { Content } from "@radix-ui/react-dialog";
 
 export function Playground() {
   const [inputValue, setInputValue] = useState("");
@@ -137,6 +138,7 @@ export function Playground() {
               onKeyUp={(e) => {
                 if (e.key === "Enter") {
                   handleSendMessage();
+                  console.log(Content);
                 }
               }}
             />
