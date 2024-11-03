@@ -40,7 +40,7 @@ def deform_response(response):
 @cl.on_chat_start
 async def on_chat_start():
     await Message(
-        content="Bonjour ! Souhaitez-vous utiliser le chatbot en version **généraliste** ou en version experte en **EHS** ?\n\nVeuillez répondre par 'généraliste' ou 'ehs'."
+        content="Bonjour ! Souhaitez-vous utiliser le chatbot en version **généraliste** ou en version experte en **EHS** ?\n\n."
     ).send()
 
 @cl.on_message
