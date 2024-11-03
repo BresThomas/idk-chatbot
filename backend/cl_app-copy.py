@@ -6,6 +6,7 @@ from langchain.schema.runnable import Runnable
 from langchain.schema.runnable.config import RunnableConfig
 from dotenv import load_dotenv
 import chainlit as cl
+from langchain_core.runnables import RunnablePassthrough
 
 # Import the MetadataFilteredRetriever class
 from metadata_filtered_retriever import MetadataFilteredRetriever
