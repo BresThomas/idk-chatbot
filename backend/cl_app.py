@@ -242,7 +242,8 @@ Voici la question de l'utilisateur : {message.content}"""
             )
 
             # Envoyer le message avec l'élément d'image attaché
-            await Message(content="Voici l'image générée :", elements=[image_element]).send()
+            msg = await Message(content="Voici l'image générée :").send()
+            await image_element.send(for_id=msg.id)
 
         except Exception as e:
             await Message(content="Erreur lors de la génération de l'image.").send()
